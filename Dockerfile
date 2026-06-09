@@ -8,19 +8,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt .
+# Copy requirements from the backend folder
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the backend files
-COPY . .
+# Copy all code from the backend folder into the container working directory
+COPY backend/ .
 
-# Force Python to look at the current working directory for modules
+# Ensure Python treats the app directory as the root path
 ENV PYTHONPATH=/app
-
-# Expose the port Render expects
 EXPOSE 5000
 
-# Run gunicorn. 
-# NOTE: If your main flask file is NOT named "app.py" (e.g., it's server.py), change "app:app" to "server:app"
 CMD ["gunicorn", "--workers", "1", "--timeout", "60", "--bind", "0.0.0.0:5000", "app:app"]
